@@ -1,0 +1,178 @@
+{
+  "info": {
+    "name": "go_example",
+    "description": "API collection for go_example (Gateway, User Service, Order Service)",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    { "key": "baseUrl", "value": "http://localhost:8080" },
+    { "key": "userId", "value": "" },
+    { "key": "orderId", "value": "" }
+  ],
+  "item": [
+    {
+      "name": "Health",
+      "item": [
+        {
+          "name": "Gateway Health",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/health",
+            "description": "Gateway health check"
+          }
+        },
+        {
+          "name": "User Service 1 Health",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "http://localhost:8081/health",
+            "description": "User service instance 1 (direct)"
+          }
+        },
+        {
+          "name": "User Service 2 Health",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "http://localhost:8082/health",
+            "description": "User service instance 2 (direct)"
+          }
+        },
+        {
+          "name": "Order Service Health",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "http://localhost:8091/health",
+            "description": "Order service (direct)"
+          }
+        }
+      ]
+    },
+    {
+      "name": "Users",
+      "item": [
+        {
+          "name": "Create User",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "if (pm.response.code === 201) {",
+                  "    var json = pm.response.json();",
+                  "    if (json.id) pm.collectionVariables.set('userId', json.id);",
+                  "}"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"username\": \"can\",\n  \"initialBalance\": 5000\n}"
+            },
+            "url": "{{baseUrl}}/users",
+            "description": "Creates a new user. On success, the response id is stored in collection variable 'userId'."
+          }
+        },
+        {
+          "name": "Get User by ID",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/users/{{userId}}",
+            "description": "Gets user by userId variable. Run Create User first or set userId."
+          }
+        },
+        {
+          "name": "Get User by ID (manual)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/users/:id",
+              "host": ["{{baseUrl}}"],
+              "path": ["users", ":id"],
+              "variable": [{ "key": "id", "value": "" }]
+            },
+            "description": "Gets user by path variable :id."
+          }
+        }
+      ]
+    },
+    {
+      "name": "Orders",
+      "item": [
+        {
+          "name": "Create Order",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "if (pm.response.code === 201) {",
+                  "    var json = pm.response.json();",
+                  "    if (json.id) pm.collectionVariables.set('orderId', json.id);",
+                  "}"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"userId\": \"{{userId}}\",\n  \"amount\": 1000\n}"
+            },
+            "url": "{{baseUrl}}/orders",
+            "description": "Creates an order (starts saga). Requires userId; run Create User first. On success, order id is stored in 'orderId' variable."
+          }
+        },
+        {
+          "name": "Get Order by ID",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/orders/{{orderId}}",
+            "description": "Gets order by orderId. After saga completes, status is CONFIRMED or CANCELED."
+          }
+        },
+        {
+          "name": "Cancel Order",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": "{{baseUrl}}/orders/{{orderId}}",
+            "description": "Cancels order (compensation: user balance is restored). Returns 204 No Content."
+          }
+        },
+        {
+          "name": "Get Order by ID (manual)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/orders/:id",
+              "host": ["{{baseUrl}}"],
+              "path": ["orders", ":id"],
+              "variable": [{ "key": "id", "value": "" }]
+            },
+            "description": "Gets order by path variable :id."
+          }
+        }
+      ]
+    }
+  ]
+}
