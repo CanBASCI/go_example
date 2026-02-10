@@ -88,4 +88,4 @@ go run ./cmd/order-service
 
 ## License
 
-Educational example project.
+MIT
