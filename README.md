@@ -1,6 +1,6 @@
 # Go Example – Go Fiber with Event-Driven Saga
 
-This project is a microservices example in **Go** with **Go Fiber v3**, matching the same architecture as the Spring Boot 4 reference project. It includes an API Gateway, User Service, Order Service, and Kafka-based event-driven saga (choreography).
+This project is a microservices example in **Go** with **Go Fiber v3**, matching the same architecture as the [Spring Boot 4 reference project](https://github.com/CanBASCI/springboot4). It includes an API Gateway, User Service, Order Service, and Kafka-based event-driven saga (choreography).
 
 ## Architecture
 
