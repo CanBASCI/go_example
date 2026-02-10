@@ -99,6 +99,7 @@ services:
       DB_USER: user
       DB_PASSWORD: password
       KAFKA_BOOTSTRAP_SERVERS: kafka:29092
+      ORDER_SERVICE_URL: http://order-service:8091
     ports:
       - "8081:8081"
     healthcheck:
@@ -125,6 +126,7 @@ services:
       DB_USER: user
       DB_PASSWORD: password
       KAFKA_BOOTSTRAP_SERVERS: kafka:29092
+      ORDER_SERVICE_URL: http://order-service:8091
     ports:
       - "8082:8082"
     healthcheck:

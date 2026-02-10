@@ -74,6 +74,7 @@ go run ./cmd/order-service
 | GET | /health | Health check |
 | POST | /users | Create user (`username`, `initialBalance`) |
 | GET | /users/:id | Get user |
+| GET | /users/:id/orders | Get user with their orders (aggregated from user + order services) |
 | POST | /orders | Create order (`userId`, `amount`) – starts saga |
 | GET | /orders/:id | Get order |
 | DELETE | /orders/:id | Cancel order (compensation) |

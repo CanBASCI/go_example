@@ -64,6 +64,19 @@ func (s *OrderService) GetByID(ctx context.Context, id uuid.UUID) (*dto.OrderRes
 	return toOrderResponse(o), nil
 }
 
+// ListByUserID returns all orders for a user.
+func (s *OrderService) ListByUserID(ctx context.Context, userID uuid.UUID) ([]*dto.OrderResponse, error) {
+	orders, err := s.repo.ListByUserID(ctx, userID)
+	if err != nil {
+		return nil, err
+	}
+	out := make([]*dto.OrderResponse, len(orders))
+	for i, o := range orders {
+		out[i] = toOrderResponse(o)
+	}
+	return out, nil
+}
+
 // ConfirmOrder sets order status to CONFIRMED.
 func (s *OrderService) ConfirmOrder(ctx context.Context, orderID uuid.UUID) error {
 	o, err := s.repo.GetByID(ctx, orderID)

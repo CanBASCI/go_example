@@ -5,17 +5,19 @@ import (
 	"github.com/google/uuid"
 
 	"go_example/cmd/user-service/dto"
+	"go_example/cmd/user-service/orderclient"
 	"go_example/cmd/user-service/service"
 )
 
 // UserHandler handles HTTP requests for users.
 type UserHandler struct {
-	svc *service.UserService
+	svc            *service.UserService
+	orderServiceURL string
 }
 
 // NewUserHandler creates a new UserHandler.
-func NewUserHandler(svc *service.UserService) *UserHandler {
-	return &UserHandler{svc: svc}
+func NewUserHandler(svc *service.UserService, orderServiceURL string) *UserHandler {
+	return &UserHandler{svc: svc, orderServiceURL: orderServiceURL}
 }
 
 // CreateUser creates a new user.
@@ -54,4 +56,26 @@ func (h *UserHandler) GetByID(c fiber.Ctx) error {
 		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{"error": err.Error()})
 	}
 	return c.JSON(user)
+}
+
+// GetUserWithOrders returns the user and their orders (aggregates user-service + order-service).
+// GET /users/:id/orders
+func (h *UserHandler) GetUserWithOrders(c fiber.Ctx) error {
+	idStr := c.Params("id")
+	id, err := uuid.Parse(idStr)
+	if err != nil {
+		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"error": "invalid user id"})
+	}
+	user, err := h.svc.GetByID(c.Context(), id)
+	if err != nil {
+		if err == service.ErrUserNotFound {
+			return c.Status(fiber.StatusNotFound).JSON(fiber.Map{"error": "user not found"})
+		}
+		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{"error": err.Error()})
+	}
+	orders, err := orderclient.ListByUserID(c.Context(), h.orderServiceURL, id)
+	if err != nil {
+		return c.Status(fiber.StatusBadGateway).JSON(fiber.Map{"error": "failed to fetch orders", "detail": err.Error()})
+	}
+	return c.JSON(fiber.Map{"user": user, "orders": orders})
 }

@@ -40,7 +40,7 @@ func main() {
 
 	userRepo := repository.NewUserRepository(pool)
 	userSvc := service.NewUserService(userRepo)
-	userHandler := handler.NewUserHandler(userSvc)
+	userHandler := handler.NewUserHandler(userSvc, cfg.OrderServiceURL)
 
 	consumer := kafka.NewConsumer(userSvc, cfg.Kafka.Brokers)
 	defer consumer.Close()
@@ -50,6 +50,7 @@ func main() {
 	app.Use(logger.New())
 	app.Get("/health", func(c fiber.Ctx) error { return c.JSON(fiber.Map{"status": "UP"}) })
 	app.Post("/users", userHandler.CreateUser)
+	app.Get("/users/:id/orders", userHandler.GetUserWithOrders)
 	app.Get("/users/:id", userHandler.GetByID)
 
 	ctx, stop := signal.NotifyContext(context.Background(), os.Interrupt, syscall.SIGTERM)

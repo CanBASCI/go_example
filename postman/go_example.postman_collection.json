@@ -93,6 +93,15 @@
           }
         },
         {
+          "name": "Get User with Orders",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/users/{{userId}}/orders",
+            "description": "Returns user and all their orders (user-service calls order-service)."
+          }
+        },
+        {
           "name": "Get User by ID (manual)",
           "request": {
             "method": "GET",

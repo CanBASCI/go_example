@@ -35,6 +35,27 @@ func (h *OrderHandler) CreateOrder(c fiber.Ctx) error {
 	return c.Status(fiber.StatusCreated).JSON(order)
 }
 
+// ListByUserID returns orders for a user (used by user-service for aggregation).
+// GET /orders?userId=xxx
+func (h *OrderHandler) ListByUserID(c fiber.Ctx) error {
+	userIDStr := c.Query("userId")
+	if userIDStr == "" {
+		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"error": "userId query parameter is required"})
+	}
+	userID, err := uuid.Parse(userIDStr)
+	if err != nil {
+		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"error": "invalid userId"})
+	}
+	orders, err := h.svc.ListByUserID(c.Context(), userID)
+	if err != nil {
+		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{"error": err.Error()})
+	}
+	if orders == nil {
+		orders = []*dto.OrderResponse{}
+	}
+	return c.JSON(orders)
+}
+
 // GetByID returns an order by ID.
 // GET /orders/:id
 func (h *OrderHandler) GetByID(c fiber.Ctx) error {

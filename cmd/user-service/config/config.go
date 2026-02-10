@@ -4,9 +4,10 @@ import "os"
 
 // Config holds user-service configuration.
 type Config struct {
-	ServerPort string
-	DB        DBConfig
-	Kafka     KafkaConfig
+	ServerPort      string
+	DB              DBConfig
+	Kafka           KafkaConfig
+	OrderServiceURL string
 }
 
 // DBConfig holds PostgreSQL configuration.
@@ -37,6 +38,7 @@ func Load() *Config {
 		Kafka: KafkaConfig{
 			Brokers: []string{getEnv("KAFKA_BOOTSTRAP_SERVERS", "localhost:9092")},
 		},
+		OrderServiceURL: getEnv("ORDER_SERVICE_URL", "http://localhost:8091"),
 	}
 }
 

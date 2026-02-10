@@ -52,6 +52,7 @@ func main() {
 	app.Use(logger.New())
 	app.Get("/health", func(c fiber.Ctx) error { return c.JSON(fiber.Map{"status": "UP"}) })
 	app.Post("/orders", orderHandler.CreateOrder)
+	app.Get("/orders", orderHandler.ListByUserID)
 	app.Get("/orders/:id", orderHandler.GetByID)
 	app.Delete("/orders/:id", orderHandler.CancelOrder)
 
