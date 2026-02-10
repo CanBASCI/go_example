@@ -18,8 +18,7 @@ func NewOrderHandler(svc *service.OrderService) *OrderHandler {
 	return &OrderHandler{svc: svc}
 }
 
-// CreateOrder creates a new order (starts saga).
-// POST /orders
+// CreateOrder creates a new order (starts saga). POST /orders
 func (h *OrderHandler) CreateOrder(c fiber.Ctx) error {
 	var req dto.CreateOrderRequest
 	if err := c.Bind().Body(&req); err != nil {
@@ -35,8 +34,7 @@ func (h *OrderHandler) CreateOrder(c fiber.Ctx) error {
 	return c.Status(fiber.StatusCreated).JSON(order)
 }
 
-// ListByUserID returns orders for a user (used by user-service for aggregation).
-// GET /orders?userId=xxx
+// ListByUserID returns orders for a user (used by user-service). GET /orders?userId=xxx
 func (h *OrderHandler) ListByUserID(c fiber.Ctx) error {
 	userIDStr := c.Query("userId")
 	if userIDStr == "" {
@@ -56,8 +54,7 @@ func (h *OrderHandler) ListByUserID(c fiber.Ctx) error {
 	return c.JSON(orders)
 }
 
-// GetByID returns an order by ID.
-// GET /orders/:id
+// GetByID returns an order by ID. GET /orders/:id
 func (h *OrderHandler) GetByID(c fiber.Ctx) error {
 	idStr := c.Params("id")
 	id, err := uuid.Parse(idStr)
@@ -74,8 +71,7 @@ func (h *OrderHandler) GetByID(c fiber.Ctx) error {
 	return c.JSON(order)
 }
 
-// CancelOrder cancels an order (triggers compensation).
-// DELETE /orders/:id
+// CancelOrder cancels an order (triggers compensation). DELETE /orders/:id
 func (h *OrderHandler) CancelOrder(c fiber.Ctx) error {
 	idStr := c.Params("id")
 	id, err := uuid.Parse(idStr)

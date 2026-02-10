@@ -20,8 +20,7 @@ func NewUserHandler(svc *service.UserService, orderServiceURL string) *UserHandl
 	return &UserHandler{svc: svc, orderServiceURL: orderServiceURL}
 }
 
-// CreateUser creates a new user.
-// POST /users
+// CreateUser creates a new user. POST /users
 func (h *UserHandler) CreateUser(c fiber.Ctx) error {
 	var req dto.CreateUserRequest
 	if err := c.Bind().Body(&req); err != nil {
@@ -40,8 +39,7 @@ func (h *UserHandler) CreateUser(c fiber.Ctx) error {
 	return c.Status(fiber.StatusCreated).JSON(user)
 }
 
-// GetByID returns a user by ID.
-// GET /users/:id
+// GetByID returns a user by ID. GET /users/:id
 func (h *UserHandler) GetByID(c fiber.Ctx) error {
 	idStr := c.Params("id")
 	id, err := uuid.Parse(idStr)
@@ -58,8 +56,7 @@ func (h *UserHandler) GetByID(c fiber.Ctx) error {
 	return c.JSON(user)
 }
 
-// GetUserWithOrders returns the user and their orders (aggregates user-service + order-service).
-// GET /users/:id/orders
+// GetUserWithOrders returns user and their orders (aggregated from user-service and order-service). GET /users/:id/orders
 func (h *UserHandler) GetUserWithOrders(c fiber.Ctx) error {
 	idStr := c.Params("id")
 	id, err := uuid.Parse(idStr)

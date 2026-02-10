@@ -3,6 +3,7 @@ package service
 import (
 	"context"
 	"errors"
+	"log"
 	"time"
 
 	"github.com/google/uuid"
@@ -86,7 +87,7 @@ func (s *OrderService) ConfirmOrder(ctx context.Context, orderID uuid.UUID) erro
 	return s.repo.UpdateStatus(ctx, o.ID, events.OrderStatusConfirmed)
 }
 
-// CancelOrder sets order status to CANCELED and publishes OrderCanceledEvent for compensation.
+// CancelOrder sets status to CANCELED and publishes OrderCanceledEvent (compensation).
 func (s *OrderService) CancelOrder(ctx context.Context, orderID uuid.UUID) error {
 	o, err := s.repo.GetByID(ctx, orderID)
 	if err != nil {
@@ -101,7 +102,10 @@ func (s *OrderService) CancelOrder(ctx context.Context, orderID uuid.UUID) error
 	}
 	if prev == events.OrderStatusPending || prev == events.OrderStatusConfirmed {
 		evt := events.OrderCanceledEvent{OrderID: o.ID, UserID: o.UserID, Amount: o.Amount}
-		_ = s.writer.PublishOrderCanceled(ctx, evt)
+		if err := s.writer.PublishOrderCanceled(ctx, evt); err != nil {
+			log.Printf("[order-service] PublishOrderCanceled failed (order %s): %v", o.ID, err)
+			return err
+		}
 	}
 	return nil
 }

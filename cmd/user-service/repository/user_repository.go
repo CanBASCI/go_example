@@ -37,7 +37,7 @@ func (r *UserRepository) GetByID(ctx context.Context, id uuid.UUID) (*domain.Use
 	return &u, nil
 }
 
-// UpdateBalance updates user balance (for reserve/release credit).
+// UpdateBalance updates user balance (reserve/release credit).
 func (r *UserRepository) UpdateBalance(ctx context.Context, id uuid.UUID, balance int64) error {
 	query := `UPDATE users SET balance = $1 WHERE id = $2`
 	_, err := r.pool.Exec(ctx, query, balance, id)

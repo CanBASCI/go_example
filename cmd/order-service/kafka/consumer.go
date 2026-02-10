@@ -12,7 +12,7 @@ import (
 	"go_example/cmd/order-service/service"
 )
 
-// Consumer runs Kafka consumers for order-service (user.credit-reserved, user.credit-reservation-failed).
+// Consumer runs Kafka consumers for order-service (credit-reserved, credit-reservation-failed topics).
 type Consumer struct {
 	orderSvc *service.OrderService
 	brokers  []string

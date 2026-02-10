@@ -13,7 +13,7 @@ import (
 	"go_example/cmd/user-service/service"
 )
 
-// Consumer runs Kafka consumers for user-service (order.created, order.canceled).
+// Consumer runs Kafka consumers for user-service (order.created, order.canceled topics).
 type Consumer struct {
 	userSvc *service.UserService
 	brokers []string
@@ -38,7 +38,7 @@ func (c *Consumer) Close() error {
 	return c.writer.Close()
 }
 
-// Run starts consuming order.created and order.canceled.
+// Run starts consuming order.created and order.canceled topics.
 func (c *Consumer) Run(ctx context.Context) {
 	var wg sync.WaitGroup
 	wg.Add(2)
@@ -137,14 +137,26 @@ func (c *Consumer) consumeOrderCanceled(ctx context.Context) {
 
 func (c *Consumer) publishCreditReserved(ctx context.Context, orderID, userID uuid.UUID, amount int64) {
 	evt := events.UserCreditReservedEvent{OrderID: orderID, UserID: userID, Amount: amount}
-	body, _ := json.Marshal(evt)
-	_ = c.writeMessage(ctx, "user.credit-reserved", body)
+	body, err := json.Marshal(evt)
+	if err != nil {
+		log.Printf("[user-service] marshal UserCreditReservedEvent: %v", err)
+		return
+	}
+	if err := c.writeMessage(ctx, "user.credit-reserved", body); err != nil {
+		log.Printf("[user-service] write user.credit-reserved: %v", err)
+	}
 }
 
 func (c *Consumer) publishCreditReservationFailed(ctx context.Context, orderID, userID uuid.UUID, amount int64, reason string) {
 	evt := events.UserCreditReservationFailedEvent{OrderID: orderID, UserID: userID, Amount: amount, Reason: reason}
-	body, _ := json.Marshal(evt)
-	_ = c.writeMessage(ctx, "user.credit-reservation-failed", body)
+	body, err := json.Marshal(evt)
+	if err != nil {
+		log.Printf("[user-service] marshal UserCreditReservationFailedEvent: %v", err)
+		return
+	}
+	if err := c.writeMessage(ctx, "user.credit-reservation-failed", body); err != nil {
+		log.Printf("[user-service] write user.credit-reservation-failed: %v", err)
+	}
 }
 
 func (c *Consumer) writeMessage(ctx context.Context, topic string, value []byte) error {

@@ -51,7 +51,7 @@ func (s *UserService) GetByID(ctx context.Context, id uuid.UUID) (*dto.UserRespo
 	return toUserResponse(u), nil
 }
 
-// ReserveCredit deducts amount from user balance. Returns true if successful.
+// ReserveCredit deducts amount from balance. Returns true if successful.
 func (s *UserService) ReserveCredit(ctx context.Context, userID uuid.UUID, amount int64) (bool, error) {
 	u, err := s.repo.GetByID(ctx, userID)
 	if err != nil {
@@ -63,7 +63,7 @@ func (s *UserService) ReserveCredit(ctx context.Context, userID uuid.UUID, amoun
 	return true, s.repo.UpdateBalance(ctx, userID, u.Balance-amount)
 }
 
-// ReleaseCredit adds amount back to user balance (compensation).
+// ReleaseCredit restores amount to balance (compensation).
 func (s *UserService) ReleaseCredit(ctx context.Context, userID uuid.UUID, amount int64) error {
 	u, err := s.repo.GetByID(ctx, userID)
 	if err != nil {

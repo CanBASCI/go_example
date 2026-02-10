@@ -15,6 +15,7 @@ import (
 	"github.com/gofiber/fiber/v3/middleware/recover"
 	"github.com/jackc/pgx/v5/pgxpool"
 
+	"go_example/internal/metrics"
 	"go_example/cmd/order-service/config"
 	"go_example/cmd/order-service/handler"
 	"go_example/cmd/order-service/kafka"
@@ -47,9 +48,13 @@ func main() {
 
 	consumer := kafka.NewConsumer(orderSvc, cfg.Kafka.Brokers)
 
+	metrics.RegisterHTTPMetrics("order-service")
+
 	app := fiber.New()
 	app.Use(recover.New())
 	app.Use(logger.New())
+	app.Use(metrics.HTTPMiddleware())
+	app.Get("/metrics", metrics.MetricsHandler())
 	app.Get("/health", func(c fiber.Ctx) error { return c.JSON(fiber.Map{"status": "UP"}) })
 	app.Post("/orders", orderHandler.CreateOrder)
 	app.Get("/orders", orderHandler.ListByUserID)
@@ -74,7 +79,7 @@ func main() {
 	}
 }
 
-// advisoryLockID: ensure only one instance runs migration when multiple order-service instances exist
+// advisoryLockID ensures only one instance runs migrations when multiple share the same DB.
 const advisoryLockID int64 = 0x6f72646572 // "order"
 
 func runMigrations(pool *pgxpool.Pool) error {

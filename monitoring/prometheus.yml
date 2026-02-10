@@ -1,0 +1,32 @@
+# Prometheus scrape config for go_example services
+global:
+  scrape_interval: 15s
+  evaluation_interval: 15s
+
+scrape_configs:
+  - job_name: gateway
+    static_configs:
+      - targets: ["gateway:8080"]
+        labels:
+          service: gateway
+          role: api-gateway
+
+  - job_name: user-service
+    static_configs:
+      - targets: ["user-service-1:8081", "user-service-2:8082"]
+        labels:
+          service: user-service
+          role: backend
+
+  - job_name: order-service
+    static_configs:
+      - targets: ["order-service:8091"]
+        labels:
+          service: order-service
+          role: backend
+
+  - job_name: prometheus
+    static_configs:
+      - targets: ["localhost:9090"]
+        labels:
+          service: prometheus

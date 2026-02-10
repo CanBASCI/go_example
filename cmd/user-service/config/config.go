@@ -1,6 +1,10 @@
 package config
 
-import "os"
+import (
+	"net/url"
+	"os"
+	"strings"
+)
 
 // Config holds user-service configuration.
 type Config struct {
@@ -36,7 +40,7 @@ func Load() *Config {
 			Password: getEnv("DB_PASSWORD", "password"),
 		},
 		Kafka: KafkaConfig{
-			Brokers: []string{getEnv("KAFKA_BOOTSTRAP_SERVERS", "localhost:9092")},
+			Brokers: getEnvSlice("KAFKA_BOOTSTRAP_SERVERS", []string{"localhost:9092"}),
 		},
 		OrderServiceURL: getEnv("ORDER_SERVICE_URL", "http://localhost:8091"),
 	}
@@ -49,7 +53,31 @@ func getEnv(key, fallback string) string {
 	return fallback
 }
 
-// DSN returns PostgreSQL connection string.
+func getEnvSlice(key string, fallback []string) []string {
+	if v := os.Getenv(key); v != "" {
+		parts := strings.Split(v, ",")
+		out := make([]string, 0, len(parts))
+		for _, p := range parts {
+			if s := strings.TrimSpace(p); s != "" {
+				out = append(out, s)
+			}
+		}
+		if len(out) > 0 {
+			return out
+		}
+	}
+	return fallback
+}
+
+// DSN returns PostgreSQL connection string (password URL-escaped).
 func (c *DBConfig) DSN() string {
-	return "postgres://" + c.User + ":" + c.Password + "@" + c.Host + ":" + c.Port + "/" + c.Database + "?sslmode=disable"
+	user := url.UserPassword(c.User, c.Password)
+	u := &url.URL{
+		Scheme:   "postgres",
+		User:     user,
+		Host:     c.Host + ":" + c.Port,
+		Path:     "/" + c.Database,
+		RawQuery: "sslmode=disable",
+	}
+	return u.String()
 }

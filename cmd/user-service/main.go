@@ -15,6 +15,7 @@ import (
 	"github.com/gofiber/fiber/v3/middleware/recover"
 	"github.com/jackc/pgx/v5/pgxpool"
 
+	"go_example/internal/metrics"
 	"go_example/cmd/user-service/config"
 	"go_example/cmd/user-service/handler"
 	"go_example/cmd/user-service/kafka"
@@ -45,9 +46,13 @@ func main() {
 	consumer := kafka.NewConsumer(userSvc, cfg.Kafka.Brokers)
 	defer consumer.Close()
 
+	metrics.RegisterHTTPMetrics("user-service")
+
 	app := fiber.New()
 	app.Use(recover.New())
 	app.Use(logger.New())
+	app.Use(metrics.HTTPMiddleware())
+	app.Get("/metrics", metrics.MetricsHandler())
 	app.Get("/health", func(c fiber.Ctx) error { return c.JSON(fiber.Map{"status": "UP"}) })
 	app.Post("/users", userHandler.CreateUser)
 	app.Get("/users/:id/orders", userHandler.GetUserWithOrders)
@@ -71,7 +76,7 @@ func main() {
 	}
 }
 
-// advisoryLockID: ensure only one instance runs migration (user-service-1 and user-service-2 share same DB)
+// advisoryLockID ensures only one instance runs migrations when multiple share the same DB.
 const advisoryLockID int64 = 0x75736572 // "user"
 
 func runMigrations(pool *pgxpool.Pool) error {
@@ -81,7 +86,7 @@ func runMigrations(pool *pgxpool.Pool) error {
 		return err
 	}
 	defer conn.Release()
-	// Aynı DB'ye bağlanan birden fazla instance’dan sadece biri migration çalıştırsın
+	// Single migration runner when multiple instances share the same DB.
 	_, err = conn.Exec(ctx, "SELECT pg_advisory_lock($1)", advisoryLockID)
 	if err != nil {
 		return err

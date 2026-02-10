@@ -12,32 +12,28 @@ const (
 	OrderStatusCanceled  OrderStatus = "CANCELED"
 )
 
-// OrderCreatedEvent is published when an order is created.
-// User-service listens to reserve credit.
+// OrderCreatedEvent is published when an order is created. User-service reserves credit.
 type OrderCreatedEvent struct {
 	OrderID uuid.UUID `json:"orderId"`
 	UserID  uuid.UUID `json:"userId"`
 	Amount  int64     `json:"amount"`
 }
 
-// OrderCanceledEvent is published when an order is canceled.
-// User-service listens to release reserved credit (compensation).
+// OrderCanceledEvent is published when an order is canceled. User-service releases credit (compensation).
 type OrderCanceledEvent struct {
 	OrderID uuid.UUID `json:"orderId"`
 	UserID  uuid.UUID `json:"userId"`
 	Amount  int64     `json:"amount"`
 }
 
-// UserCreditReservedEvent is published when credit is successfully reserved.
-// Order-service listens to confirm the order.
+// UserCreditReservedEvent is published when credit is reserved. Order-service confirms the order.
 type UserCreditReservedEvent struct {
 	OrderID uuid.UUID `json:"orderId"`
 	UserID  uuid.UUID `json:"userId"`
 	Amount  int64     `json:"amount"`
 }
 
-// UserCreditReservationFailedEvent is published when credit reservation fails.
-// Order-service listens to cancel the order.
+// UserCreditReservationFailedEvent is published when reservation fails. Order-service cancels the order.
 type UserCreditReservationFailedEvent struct {
 	OrderID uuid.UUID `json:"orderId"`
 	UserID  uuid.UUID `json:"userId"`

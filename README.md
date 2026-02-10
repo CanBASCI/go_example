@@ -9,6 +9,8 @@ This project is a microservices example in **Go** with **Go Fiber v3**, matching
 - **Order Service** (port 8091) – Order and saga orchestration, Kafka producer/consumer
 - **Event-Driven Saga** – Asynchronous communication and compensation via Apache Kafka
 - **PostgreSQL** – Per-service databases
+- **Prometheus** (port 9090) – Metrics scraped from gateway and backend instances
+- **Grafana** (port 3000) – Dashboards: instance status, request rate, latency (p50/p95), 4xx/5xx errors
 
 ## Tech Stack
 
@@ -53,6 +55,8 @@ User Service 1: http://localhost:8081
 User Service 2: http://localhost:8082  
 Order Service: http://localhost:8091  
 Kafka UI: http://localhost:8085  
+**Prometheus:** http://localhost:9090  
+**Grafana:** http://localhost:3000 (login: admin / admin) – Pre-provisioned dashboard *Go Example – Instances & Services*: instance up, request rate by path, request duration (p50/p95), error rate (4xx/5xx) and error counts (last 1h).
 
 ## Local Development (infrastructure in Docker)
 

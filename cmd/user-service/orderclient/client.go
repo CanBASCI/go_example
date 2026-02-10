@@ -6,11 +6,15 @@ import (
 	"fmt"
 	"net/http"
 	"net/url"
+	"time"
 
 	"github.com/google/uuid"
 )
 
-// OrderSummary is the order payload returned by order-service (GET /orders?userId=).
+// DefaultHTTPClient is used for outbound calls to order-service (10s timeout).
+var DefaultHTTPClient = &http.Client{Timeout: 10 * time.Second}
+
+// OrderSummary is the order payload from order-service GET /orders?userId=.
 type OrderSummary struct {
 	ID        uuid.UUID `json:"id"`
 	UserID    uuid.UUID `json:"userId"`
@@ -19,7 +23,7 @@ type OrderSummary struct {
 	CreatedAt string    `json:"createdAt"`
 }
 
-// ListByUserID calls order-service GET /orders?userId= and returns orders for the user.
+// ListByUserID fetches orders for the user from order-service.
 func ListByUserID(ctx context.Context, baseURL string, userID uuid.UUID) ([]OrderSummary, error) {
 	u, err := url.Parse(baseURL)
 	if err != nil {
@@ -31,7 +35,7 @@ func ListByUserID(ctx context.Context, baseURL string, userID uuid.UUID) ([]Orde
 	if err != nil {
 		return nil, err
 	}
-	resp, err := http.DefaultClient.Do(req)
+	resp, err := DefaultHTTPClient.Do(req)
 	if err != nil {
 		return nil, err
 	}
